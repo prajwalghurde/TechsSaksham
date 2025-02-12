@@ -1,45 +1,53 @@
 import streamlit as st
 import google.generativeai as genai
+import os
 
-# Securely fetch API key from Streamlit secrets
-GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
+# ✅ STEP 1: DEBUG STREAMLIT SECRETS
+st.write("🔍 Debugging Secrets:", dict(st.secrets))
+
+# ✅ STEP 2: FETCH API KEY (FIRST TRY ST.SEARCHES, THEN FALLBACK TO ENV VAR)
+GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY"))
+
+if not GEMINI_API_KEY:
+    st.error("❌ API Key is missing! Please add it in Streamlit Secrets or as an environment variable.")
+    st.stop()
+
+# ✅ STEP 3: CONFIGURE GEMINI API
 genai.configure(api_key=GEMINI_API_KEY)
 
-# Function to get response from Gemini API
+# ✅ STEP 4: FUNCTION TO GET RESPONSE
 def get_gemini_response(user_input):
     try:
-        model = genai.GenerativeModel(model_name="gemini-pro")  # Correct model
+        model = genai.GenerativeModel(model_name="gemini-pro")
         response = model.generate_content(user_input)
-        return response.text  # Extract and return text response
+        return response.text  
     except Exception as e:
-        return f"⚠️ Error: {str(e)}"
+        return f"⚠️ API Error: {str(e)}"
 
-# Streamlit App UI
-st.title("AI Healthcare Chatbot 🏥🤖")
-st.write("Ask me any health-related question!")
+# ✅ STEP 5: STREAMLIT APP UI
+st.title("💡 AI Healthcare Chatbot 🏥🤖")
+st.write("💬 *Ask me any health-related question!*")
 
-# Chat history for better UI
+# ✅ STEP 6: CHAT HISTORY
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state.messages = [{"role": "assistant", "content": "👋 Hi! How can I help you today?"}]
 
-# Display chat history
+# ✅ STEP 7: DISPLAY CHAT HISTORY
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# User Input
+# ✅ STEP 8: HANDLE USER INPUT
 user_input = st.chat_input("Type your question here...")
 
 if user_input:
-    # Add user input to chat history
-    st.session_state.messages.append({"role": "user", "content": user_input})
+    st.session_state.messages.append({"role": "user", "content": f"🧑‍💻 **You:** {user_input}"})
 
-    # Get AI Response
+    # ✅ GET AI RESPONSE
     response = get_gemini_response(user_input)
 
-    # Display AI Response
+    # ✅ DISPLAY AI RESPONSE
     with st.chat_message("assistant"):
-        st.markdown(response)
+        st.markdown(f"🤖 **AI:** {response}")
 
-    # Add response to chat history
-    st.session_state.messages.append({"role": "assistant", "content": response})
+    st.session_state.messages.append({"role": "assistant", "content": f"🤖 **AI:** {response}"})
