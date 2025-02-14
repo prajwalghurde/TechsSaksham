@@ -6,9 +6,9 @@ from config import GEMINI_API_KEY
 genai.configure(api_key=GEMINI_API_KEY)
 
 def get_gemini_response(user_input):
-    model = genai.GenerativeModel(model_name="gemini-pro")  # Correct method
+    model = genai.GenerativeModel(model_name="gemini-pro")  
     response = model.generate_content(user_input)
-    return response.text  # Extract text from response
+    return response.text 
 
 # Streamlit UI
 st.title("AI Healthcare Chatbot 🏥🤖")
